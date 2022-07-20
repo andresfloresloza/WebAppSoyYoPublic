@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   existUserByPublicId,
+  getLinksCustoms,
   getProfilePhotoUrl,
   getUserPublicProfileInfo,
 } from "../firebase/firebase";
@@ -18,6 +19,7 @@ import logo from "../assets/img/logo-mt-corp.svg";
 import { ListSecondaryLink } from "../components/listSecondaryLink";
 import { ListPrimaryLink } from "../components/listPrimaryLink";
 import { Contact } from "../components/contact";
+import { ListCustomLink } from "../components/listCustomLink";
 
 export default function PublicProfileView() {
   const params = useParams(); //permite tener info de las URL, es decir las variables que se pasaron por la direccion del enlace
@@ -34,6 +36,7 @@ export default function PublicProfileView() {
   const [bg, setBg] = useState("first");
   const [bgHover, setBgHover] = useState("firstHover");
   const qrComponent = QrCodeGr(params.publicId + "");
+  const [links, setLinks] = useState([]);
 
   useEffect(() => {
     // setState(1);
@@ -47,6 +50,7 @@ export default function PublicProfileView() {
       if (userUid) {
         try {
           const userInfo = await getUserPublicProfileInfo(userUid);
+          const listCustom = await getLinksCustoms(userUid);
           setUsername(userInfo.profileInfo.username);
           setDisplayName(userInfo.profileInfo.displayName);
           setCareer(userInfo.profileInfo.career);
@@ -55,6 +59,7 @@ export default function PublicProfileView() {
           console.log(theme);
           handleTheme(userInfo.profileInfo.theme);
           setLinkList(userInfo.linksInfo);
+          setLinks([...listCustom]);
           const url = await getProfilePhotoUrl(
             userInfo.profileInfo.profilePicture
           );
@@ -163,6 +168,19 @@ export default function PublicProfileView() {
                     bgHover={bgHover}
                     linkList={getLinksListByCategory("secondary")}
                   ></ListSecondaryLink>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={style.secondaryLinksOutsideContainer}>
+            <div className={style.secondaryLinksContainer}>
+              <div className={style.secondaryLinksSort}>
+                <div className={style.secondaryLinkRow}>
+                  <ListCustomLink
+                    bg={bg}
+                    bgHover={bgHover}
+                    linkList={links}
+                  ></ListCustomLink>
                 </div>
               </div>
             </div>
